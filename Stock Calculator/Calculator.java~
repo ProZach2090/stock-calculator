@@ -1,0 +1,298 @@
+/* Calculator.java   
+ * @author Zachary Lem   Created: Jan. 8, 2016   Finalized Version: Jan. 16, 2016
+ * The runner class. The class that runs the entire GUI interface.
+ * This class will also use the collector class to generate the analysis file.
+ */ 
+
+// Import the necessary libraries that this class needs
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.FileNotFoundException;
+
+public class Calculator extends JFrame implements ItemListener, ActionListener 
+{
+  // Declare a Collector variable
+  private Collector collector;
+  // Declare a constant for the size of the JTextField block
+  private final static int JTF_SIZE = 100; 
+  // Declare a variable for the JTextField
+  private JTextField file;
+  // Declare the labels for each menu item, button, and check button
+  private String bttnNames[] = {"Reset", "Go!"};
+  private String jcbNames[] = {"Standard Deviation", "Correlation Coefficient", "Line of Best Fit", "Mean", "Median", "Mode", "Display data with variable statistics"};
+  private String menuNames[] = {"Help", "Calculations"};
+  // Declare the JCheckBoxes in an array
+  private JCheckBox selections[];
+  // Declare the JButtons in an array
+  private JButton buttons[];
+  // Declare a label for the file locater
+  private JLabel locaterLabel;
+  // Declare the JMenuItems in an array
+  private JMenuItem mItems[];
+  // Declare a JMenuBar for the options menu
+  private JMenuBar bar = new JMenuBar();
+  // Declare the options menu through a JMenu
+  private JMenu options = new JMenu("Options");
+  // Declare an array of booleans that indicate which button is pressed
+  private boolean buttonPressed[] = new boolean[7];
+  
+  /* setCheckBoxes Method
+   * Creates a new set of check boxes for the GUI interface.
+   * Pre-Condition: There are no check boxes to begin with.
+   * Post-Condition: There will be functional check boxes.
+   */  
+  private void setCheckBoxes()
+  {
+    // Set up the selections array
+    selections = new JCheckBox[jcbNames.length]; 
+    // Create each check box in the array
+    for (int i = 0; i < jcbNames.length; i++)
+    {
+      // Set up the check box one of the jcbNames labels
+      selections[i] = new JCheckBox(jcbNames[i], false);
+      // Add an item listener to the check box
+      selections[i].addItemListener(this);
+    }// end for
+  }// end setCheckBoxes
+  
+  /* setMenuBar Method
+   * Creates a new menu bar for the GUI interface
+   * Pre-Conditions: There is no menu bar to begin with.
+   * Post-Condition: There will be a menu bar that contains menu items.
+   */ 
+  private void setMenuBar()
+  {
+    // Create the mItems array
+    mItems = new JMenuItem[menuNames.length];
+    // Create each menu item in the array
+    for (int i = 0; i < menuNames.length; i++)
+    {
+      // Set up the menu item with one of the menuNames labels
+      mItems[i] = new JMenuItem(menuNames[i]);
+      // Add an action listener to the menu item
+      mItems[i].addActionListener(this);
+    }// end for
+  }// end setMenuBar
+  
+  /* itemStateChanged Method
+   * Performs an action if a check box has been clicked.
+   * @param "ItemEvent event" - The event of a check box.
+   * Pre-Condition: event is never null.
+   * Post-Condition: set one of the boolean values in the buttonPressed array.
+   */ 
+  public void itemStateChanged(ItemEvent event)
+  { 
+    // If the standard deviation button is pressed
+    if (event.getSource() == selections[0])
+    {
+      if (event.getStateChange() == ItemEvent.SELECTED) buttonPressed[0] = true;
+      else buttonPressed[0] = false;
+    }
+    // If the correlation coefficient button is pressed
+    else if (event.getSource() == selections[1])
+    {
+      if (event.getStateChange() == ItemEvent.SELECTED) buttonPressed[1] = true;
+      else buttonPressed[1] = false;
+    }
+    // If the line of best fit button is pressed
+    else if (event.getSource() == selections[2])
+    {
+      if (event.getStateChange() == ItemEvent.SELECTED) buttonPressed[2] = true;
+      else buttonPressed[2] = false;
+    }
+    // If the mean button is pressed
+    else if (event.getSource() == selections[3])
+    {
+      if (event.getStateChange() == ItemEvent.SELECTED) buttonPressed[3] = true;
+      else buttonPressed[3] = false;
+    }
+    // If the median button is pressed
+    else if (event.getSource() == selections[4])
+    {
+      if (event.getStateChange() == ItemEvent.SELECTED) buttonPressed[4] = true;
+      else buttonPressed[4] = false;
+    }
+    // If the mode button is pressed
+    else if (event.getSource() == selections[5])
+    {
+      if (event.getStateChange() == ItemEvent.SELECTED) buttonPressed[5] = true;
+      else buttonPressed[5] = false;
+    }
+    // If the display variable button is pressed
+    else if (event.getSource() == selections[6])
+    {
+      if (event.getStateChange() == ItemEvent.SELECTED) buttonPressed[6] = true;
+      else buttonPressed[6] = false;
+    }
+  }// end itemStateChanged
+  
+  /* actionPerformed Method
+   * Performs an action if a button or a menu item has been clicked.
+   * @param "ActionEvent event" - The event of a button or menu item.
+   * Pre-Condition: event is never null.
+   * Post-Condition: performs a sepcific action, depending on which button is pressed.
+   */ 
+  public void actionPerformed(ActionEvent event)
+  {
+    // Have an object determine where the source is coming from
+    Object source = event.getSource();
+    // If the help menu item is selected.
+    if (source == mItems[0])
+    {
+      JTextArea help = new JTextArea
+        (
+         "Help\n" +
+         "Some FAQs that you should take into consideration.\n\n" +
+         "Q: How does this program even take my data?\n" +
+         "There's a particular format to use in order for the program to take the data.\n" +
+         "The format goes like this: [Insert Date Here]@[Insert Price Here]\n" +
+         "Make sure that each date is on a seperate line in your text file\n" +
+         "For example:\n" +
+         "Sept. 1, 2015@123.45\n" +
+         "Dec. 25, 2015@678.90\n\n" +
+         "Q: What's this error 'input file does not exist.'?\n" +
+         "Exactly as the error states, the program can not find the file that you've input.\n" +
+         "Keep in mind that this program is case sensitive so make sure that you copy the file name EXACTLY as it was titled.\n\n" +
+         "Q: My file exists, but the program is still not reading it. Why?\n" +
+         "This is most likely because the text data file is not in the same folder as the runner class of the program.\n\n" +
+         "Q: What's this error 'Numeric data from file can not be formatted.'?\n" +
+         "This means that the formatting in the file for the stock prices is incorrect.\n" +
+         "You either accidently added a letter to one of the prices or forgot to seperate the date and cost with an '@' symbol.\n" +
+         "For the stock prices, make sure that these values are an actually dollar-cents format. (ie. $12.34)"
+        );
+      help.setEditable(false);
+      // Display how the program works
+      JOptionPane.showMessageDialog(null, help);
+    }
+    // If the calculations menu item is selected
+    else if (source == mItems[1])
+    {
+      JTextArea calculation = new JTextArea
+        (
+         "Calculation\n" +
+         "A breif explanation of each of the calculations.\n\n" +
+         "Standard Deviation\n" +
+         "The standard deviation is the square root of the variance, the average distance of the scores from the deviation.\n" +
+         "The standard deviation of a set of data determines the average distance of the measurements from the mean.\n" +
+         "The larger the value of the standard deviation, the greater the spread of the data.\n\n" +
+         "Correlation Coefficient\n" + 
+         "The co-relation coefficient is the measure of how well a linear model fits a variable set of data.\n" +
+         "The co-relation coefficient can tell the strength and direction of the linear correlation.\n\n" +
+         "Line of Best Fit\n" +
+         "The line of best fit is a straight line that represents a trend in a set of data.\n" +
+         "It passes through as many points as possible, with about half the points above and the other half below the line.\n\n" +
+         "Mean\n" +
+         "The sum of the data entries divided by the number of entities.\n\n" +
+         "Median\n" +
+         "The middle value of all the data points when the data values are listed in ascending order.\n\n" +
+         "Mode\n" +
+         "The data value that occurs most often in a data set."
+        );
+      // Display the information about the calculations.
+      JOptionPane.showMessageDialog(null, calculation);
+    }
+    // If the reset button is pressed
+    else if (source == buttons[0])
+    {
+      // Clear out the JTextField for the file locater
+      file.setText("");
+      // Put all check boxes to unchecked
+      for (JCheckBox currBox: selections)
+        currBox.setSelected(false);
+    }
+    // If the button go is pressed
+    else if (source == buttons[1])
+    {
+      // Determine to see of the file the user input is actually there
+      try {collector = new Collector(file.getText(), buttonPressed);}
+      // If not, catch error and tell the user that the file does not exist
+      catch (FileNotFoundException fnfe) {JOptionPane.showMessageDialog(null, "Error: input file does not exist.");}
+    }
+  }// end actionPerformed
+  
+  /* ContainerSetup Method
+   * Creates the frame of the GUI interface.
+   * No pre-conditions for this method.
+   * Post-Condition: Creates a GUI window with all the buttons, boxes, and menu.
+   */ 
+  private void ContainerSetup()
+  {
+    // Get the content Pane object
+    Container c = getContentPane();
+    
+    // Add the menu bar to the frame
+    for (int i = 0; i < menuNames.length; i++) 
+      options.add(mItems[i]);
+    bar.add(options);
+    setJMenuBar(bar);
+    
+    // North Layout
+    // Contains the file locater
+    JPanel npanel = new JPanel();
+    npanel.setLayout(new GridLayout(2, 0));
+    locaterLabel = new JLabel("Collect Data from:");
+    file = new JTextField(JTF_SIZE);
+    npanel.add(locaterLabel);
+    npanel.add(new JLabel(" "));
+    npanel.add(file);
+    npanel.add(new JLabel(".txt"));
+    c.add(npanel, BorderLayout.NORTH);
+    
+    // South Layout
+    // Contains the buttons
+    JPanel spanel = new JPanel();
+    buttons = new JButton[bttnNames.length];
+    for (int i = 0; i < bttnNames.length; i++)
+    {
+      buttons[i] = new JButton(bttnNames[i]);
+      buttons[i].addActionListener(this);
+      spanel.add(buttons[i]);
+    }
+    c.add(spanel, BorderLayout.SOUTH);
+    
+    // West Layout
+    // Contains the check boxes
+    JPanel wpanel = new JPanel();
+    wpanel.setLayout(new GridLayout(7, 0));
+    for (int i = 0; i < jcbNames.length; i++) wpanel.add(selections[i]);
+    c.add(wpanel, BorderLayout.WEST);
+  }// end ContainerSetup
+  
+  /* Calculator Method (The Constructor Method)
+   * The method that starts the run of the program.
+   * No pre-conditions for this method.
+   * Post-Condition: Creates a window, buttons, check boxes, etc. and starts the program.
+   */ 
+  public Calculator()
+  {
+    // Use the super class constructor (JFrame)
+    super("Stock Calculator");
+    // Set the size of the window
+    setSize(300, 275);
+    // Create it at the center of the screen
+    setLocationRelativeTo(null);
+    // Set up the GUI interface
+    setCheckBoxes();
+    setMenuBar();
+    ContainerSetup();
+    // Show greetings message
+    JOptionPane.showMessageDialog
+      (
+       null,
+       "Welcome to the UNOFFICIAL Stock Calculator."+
+       "\nThis program will help calculate stock values and return analysis of you're choosing."+
+       "\nPlease refer to the Help selection located in the Options Menu for basic understanding of the function of this program."
+      );
+    // Show the interface
+    show();
+  }// end constructor
+  
+  /* main Method
+   * The method that runs of the program.
+   * @param "String args[]" - The supplied command-line arguments
+   * No pre-conditions for this method.
+   * Post-Condition: Run the program.
+   */ 
+  public static void main(String args[]){Calculator calculator = new Calculator();}
+}// end class

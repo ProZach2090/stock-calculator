@@ -1,0 +1,58 @@
+public class LineOfBestFit implements Calculation
+{
+  private String data[];
+  
+  public LineOfBestFit(String data[])
+  {
+    this.data = data;
+  }
+  
+  public double calculate()
+  {
+    double sumX = 0; 
+    double sumY = 0;
+    double sumXY = 0;
+    double sumX2 = 0;
+    for (int i = 0; i < data.length; i++)
+    {
+      double currPrice = Double.parseDouble(data[i]);
+      int dayNum = i + 1;
+      sumX += (dayNum);
+      sumY += currPrice;
+      sumXY += (dayNum * currPrice);
+      sumX2 += Math.pow(dayNum, 2);
+    }
+    
+    return ((data.length*sumXY) - (sumX*sumY)) / ((data.length*sumX2) - Math.pow(sumX, 2));
+  }
+  
+  private double getIntercept()
+  {
+    double sumX = 0; 
+    double sumY = 0;
+    for (int i = 0; i < data.length; i++)
+    {
+      double currPrice = Double.parseDouble(data[i]);
+      int dayNum = i + 1;
+      sumX += (dayNum);
+      sumY += currPrice;
+    }
+    double averageX = sumX / data.length;
+    double averageY = sumY / data.length;
+    
+    return averageY - (calculate()*averageX);
+  }
+  
+  public String conclusion()
+  {
+    String statement = "The slope (" + Calculation.DOLLAR_FORMATTER.format(calculate()) + ") has an overall ";
+    if (calculate() > 0)
+      statement += "increase for the stock prices.";
+    else if (calculate() < 0)
+      statement += "decrease for the stock prices.";
+    else if (calculate() == 0)
+      statement = "flat rate for the stock prices.";
+    return "The Line of Best Fit is: y=" + Calculation.DOLLAR_FORMATTER.format(calculate()) + "x+(" + Calculation.DOLLAR_FORMATTER.format(getIntercept()) + "). " 
+      + statement;
+  }
+}

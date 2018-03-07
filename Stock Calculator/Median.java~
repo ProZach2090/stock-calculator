@@ -1,0 +1,98 @@
+/* Median.java   
+ * @author Zachary Lem   Created: Jan. 14, 2016   Finalized Version: Jan. 16, 2016
+ * The class that will calculate for the median and give feedback based on the calculation.
+ * Implements the Calculation interface.
+ */ 
+
+public class Median implements Calculation
+{
+  // Instance variable
+  private double data[];
+  
+  /* Median Method (The Constructor Method)
+   * Sets up the instance variables.
+   * @param "String data[]" - The array of all the stock prices.
+   * Pre-Condition: data[] parameter is not null.
+   * Post-Condition: store information into the instance variable.
+   */ 
+  public Median(String data[])
+  {
+    // Parse the String values into double values
+    this.data = new double[data.length];
+    // Store the parsed value into the instance data[] array
+    for (int i = 0; i < data.length; i++)
+      this.data[i] = Double.parseDouble(data[i]);
+  }// end constructor
+  
+  /* quicksort Method
+   * Sorts the array of stock prices (Instance variable).
+   * @param "int low" - The lowest index of the array.
+   * @param "int high" - The highest index of the array.
+   * Pre-Condition: data[] is not empty (full of null's).
+   * Post-Condition: sort the stock prices in ascending order.
+   */ 
+  private void quicksort(int low, int high)
+  {
+    // Local variables based off the parameters
+    int i = low, j = high;
+    // Get the pivot element from the middle of the list
+    double pivot = data[low + (high - low) / 2];
+    // Divide into two lists
+    while (i <= j)
+    {
+      // If the current value from the left list is smaller than the pivot
+      // element then get the next element from the right list.
+      while (data[i] < pivot) i++;
+      // If the current value from the right list is larger than the pivot
+      // element then get the next element from the right list.
+      while (data[j] > pivot) j--;
+      // If we have found a values in the left list which is larger then
+      // the pivot element and if we have found  value in the right list
+      // which is smaller than the pivot element then we exchange the values.
+      if (i <= j)
+      {
+        // Exchange
+        double temp = data[i];
+        data[i] = data[j];
+        data[j] = temp;
+        // As we are done we can increase i and j
+        i++;
+        j--;
+      }// end if
+    }// end while
+    // Recursion statements
+    if(low < j) quicksort(low, j);
+    if(i < high) quicksort(i, high);
+  }// end quicksort
+  
+  /* calculate Method
+   * Performs a calculation for median.
+   * @return the median.
+   * Pre-Condition: data[] is not empty.
+   * Post-Condition: Calculates and gives the median.
+   */ 
+  public double calculate()
+  {
+    // Sort the stock prices an ascending order
+    quicksort(0, data.length - 1);
+    // Have a local variable to store the middle element, assuming the length of the array is odd
+    double thisValue = data[(data.length - 1) / 2];
+    // Change the local variable if the length of the array is actually even
+    if (data.length % 2 == 0)
+      thisValue = (data[data.length / 2] + data[(data.length / 2) - 1]) / 2;
+    // Return thisValue
+    return thisValue;
+  }// end calculate
+  
+  /* conclusion Method
+   * Gives feedback based on the results from the calculate method.
+   * @return A statement about the calculation.
+   * No pre-conditions for this method.
+   * Post-Condition: Tells about the median.
+   */ 
+  public String conclusion()
+  {
+    // Use the calculate method in the statement to talk about the return value from calculate()
+    return "The Median is: " + calculate() + ". This means that the middle most stock price is " + calculate() + ".";
+  }// end conclusion
+}// end class

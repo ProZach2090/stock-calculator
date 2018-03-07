@@ -1,0 +1,22 @@
+public class Mean implements Calculation
+{
+  private double sumOfPrices;
+  private double totalScores;
+  
+  public Mean(double sum, double total)
+  {
+    sumOfPrices = sum;
+    totalScores = total;
+  }
+  
+  public double calculate()
+  {
+    return sumOfPrices/totalScores;
+  }
+  
+  public String conclusion()
+  {
+    return "The Mean is: " + Calculation.DOLLAR_FORMATTER.format(calculate()) 
+      + ". This means that the average stock price is " + Calculation.DOLLAR_FORMATTER.format(calculate()) + ".";
+  }
+}

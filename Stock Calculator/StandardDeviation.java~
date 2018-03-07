@@ -1,0 +1,19 @@
+public class StandardDeviation implements Calculation
+{
+  private double sumOfDevs;
+  private int totalScores;
+  
+  public StandardDeviation(double sum, int total)
+  {
+    sumOfDevs = sum;
+    totalScores = total;
+  }
+  
+  public double calculate(){return Math.sqrt(sumOfDevs/totalScores);}
+  
+  public String conclusion()
+  {
+    return "The Standard Deviation is: " + Calculation.DOLLAR_FORMATTER.format(calculate()) 
+      + ". This means that the average distance between the stock prices from their deviation is about " + Calculation.DOLLAR_FORMATTER.format(calculate()) + ".";
+  }
+}

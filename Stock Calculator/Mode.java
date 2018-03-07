@@ -1,0 +1,207 @@
+/* Mode.java   
+ * @author Zachary Lem   Created: Jan. 14, 2016   Finalized Version: Jan. 16, 2016
+ * The class that will calculate for the mode and give feedback based on the calculation.
+ * Implements the Calculation interface.
+ */ 
+
+// Import the ArrayList library
+import java.util.ArrayList;
+
+public class Mode implements Calculation
+{
+  // Instance variable
+  private double data[];
+  
+  /* Mode Method (The Constructor Method)
+   * Sets up the instance variables.
+   * @param "String data[]" - The array of all the stock prices.
+   * Pre-Condition: data[] parameter is not null.
+   * Post-Condition: store information into the instance variable.
+   */ 
+  public Mode(String data[])
+  {
+    // Parse the String values into double values
+    this.data = new double[data.length];
+    // Store the parsed value into the instance data[] array
+    for (int i = 0; i < data.length; i++)
+      this.data[i] = Double.parseDouble(data[i]);
+  }// end constructor
+  
+  /* quicksort Method
+   * Sorts the array of stock prices (Instance variable).
+   * @param "int low" - The lowest index of the array.
+   * @param "int high" - The highest index of the array.
+   * Pre-Condition: data[] is not empty (full of null's).
+   * Post-Condition: sort the stock prices in ascending order.
+   */ 
+  private void quicksort(int low, int high)
+  {
+    // Local variables
+    int i = low, j = high;
+    // Get the pivot element from the middle of the list
+    double pivot = data[low + (high - low) / 2];
+    // Divide into two lists
+    while (i <= j)
+    {
+      // If the current value from the left list is smaller than the pivot
+      // element then get the next element from the right list.
+      while (data[i] < pivot) i++;
+      // If the current value from the right list is larger than the pivot
+      // element then get the next element from the right list.
+      while (data[j] > pivot) j--;
+      // If we have found a values in the left list which is larger then
+      // the pivot element and if we have found  value in the right list
+      // which is smaller than the pivot element then we exchange the values.
+      if (i <= j)
+      {
+        // Exchange
+        double temp = data[i];
+        data[i] = data[j];
+        data[j] = temp;
+        // As we are done we can increase i and j
+        i++;
+        j--;
+      }// end if
+    }// end while
+    // Recursion statement
+    if(low < j) quicksort(low, j);
+    if(i < high) quicksort(i, high);
+  }// end quicksort
+  
+  /* search Method
+   * Sorts the array of stock prices (Instance variable).
+   * @param "int low" - The lowest index of the array.
+   * @param "int high" - The highest index of the array.
+   * @param "double key" - The price to look in the array.
+   * @return the index position of where the key value is located.
+   * Pre-Condition: data[] is not empty (full of null's).
+   * Post-Condition: Gives the index position of the key value.
+   */
+  private int search(int low, int high, double key)
+  {
+    // Return -1 if the key value is not found
+    if (low > high) return -1;
+    // Determine the middle index
+    int mid = (high + low) /2;
+    // If the key matches middle element, return the mid value
+    if (key == data[mid]) return mid;
+    // If key is less than middle element, set new high element
+    else if (key < data[mid])
+    {
+      high = mid - 1;  
+      // Recursion statement
+      return search(low, high, key);
+    }
+    // Key is greater than middle element, set new low element
+    else 
+    {
+      low = mid + 1;      
+      return search(low, high, key);
+    }
+  }// end search
+  
+  /* findMin Method
+   * Finds the smallest value in the array.
+   * @return the smallest value of the array.
+   * Pre-Condition: data[] is not empty (full of null's).
+   * Post-Condition: Gives the smallest value in the array.
+   */
+  public double findMin()
+  {
+    // By default have the smallest value as the first element in the array
+    double min = data[0];
+    // Check through each element to find the smallest value
+    for (double currPrice: data)
+      if (currPrice < min)
+        min = currPrice;
+    // Return the local variable
+    return min;
+  }// end findMin
+  
+  /* findMax Method
+   * Finds the largest value in the array.
+   * @return the largest value of the array.
+   * Pre-Condition: data[] is not empty (full of null's).
+   * Post-Condition: Gives the largest value in the array.
+   */
+  public double findMax()
+  {
+    // By default have the largest value as the first element in the array
+    double max = data[0];
+    // Check through each element to find the largest value
+    for (double currPrice: data)
+      if (currPrice > max)
+        max = currPrice;
+    // Return the local variable
+    return max;
+  }// end findMax
+  
+  /* calculate Method
+   * Performs a calculation for mode.
+   * @return the mode.
+   * Pre-Condition: data[] is not empty.
+   * Post-Condition: Calculates and gives the mode.
+   */ 
+  public double calculate()
+  {
+    // Sort out the array of stock price
+    quicksort(0, data.length - 1);
+    // Setting up a 2D array that will contain all of numbers between the minimum and maximum value
+    double range = ((findMax() - findMin()) * 100);
+    double frequency[][] = new double[(int)range + 2][2];
+    // Create an arraylist that will only take the prices that actually appeared
+    ArrayList <Double> allPrices = new ArrayList <Double>();
+    // A varaible that will track the position of the 2D array
+    int currIndex = 0;
+    // Check through each number in the range 
+    for (double i = findMin(); i <= findMax() + 1; i += 0.01)
+    {
+      // If the currIndex is at the last position of the 2D array, break out of the for loop 
+      if (currIndex >= frequency.length) break;
+      // List the stock price with a 0 to indicate that this number is in the range but is not found yet
+      frequency[currIndex][0] = Double.parseDouble(Calculation.DOLLAR_FORMATTER.format(i));
+      frequency[currIndex][1] = 0;
+      // Add a one to the frequency value of the stock price to indicate 
+      if (search(0, data.length - 1, frequency[currIndex][0]) > -1){frequency[currIndex][1]++;}
+      // Move to the next row on the 2D array
+      currIndex++;
+    }// end for
+    // If the frequency value is 1, add the stock value to the arraylist
+    for (int i = 0; i < frequency.length; i++)
+      if (frequency[i][1] > 0)
+        allPrices.add(frequency[i][0]);
+    // Local variables for finding the mode
+    double mostOccured = allPrices.get(0);// By default have the most occured price is the first element
+    int maxOccurance = 0;// A number that will indicate the most amount of times a price 
+    // Search for the price that occurs the most
+    for (int i = 0; i < allPrices.size(); i++)
+    {
+      // A local variable that will track how many times a price occurs
+      int occurance = 0;
+      for (int j = 0; j < data.length; j++)
+        if (data[j] == allPrices.get(i))// If the price on the data array is found in the arraylist...
+          occurance++;// ...add to occurance value
+      // If the amount of occurance is higher than maxOccurance, set the new mostOccured and maxOccurance
+      if (occurance > maxOccurance)
+      {
+        maxOccurance = occurance;
+        mostOccured = allPrices.get(i);
+      }
+    }// end for
+    // return the mostOccured variable
+    return mostOccured;
+  }// end calculate
+  
+  /* conclusion Method
+   * Gives feedback based on the results from the calculate method.
+   * @return A statement about the calculation.
+   * No pre-conditions for this method.
+   * Post-Condition: Tells about the mode.
+   */ 
+  public String conclusion()
+  {
+    // Use the calculate method in the statement to talk about the return value from calculate()
+    return "The Mode is: " + calculate() + ". This means that the stock price that occured the most in this set is " + 
+      calculate() + ".";
+  }// end conclusion
+}// end class
